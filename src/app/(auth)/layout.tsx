@@ -1,11 +1,13 @@
 import { ClerkProvider } from '@clerk/nextjs';
+import { dark } from '@clerk/themes';
 import { Inter } from 'next/font/google';
 import '../globals.css';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Canvas',
-  description: 'A threads or twitter clone using Next.js',
+  description:
+    'A Next.js full stack application for posting social media content, create communities, and comment on other posts - similar to threads or twitter',
 };
 
 const inter = Inter({ subsets: ['latin'] });
@@ -16,7 +18,11 @@ export default function AuthRootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        baseTheme: dark,
+      }}
+    >
       <html lang="en">
         <body className={`${inter.className} bg-dark-1`}>{children}</body>
       </html>
