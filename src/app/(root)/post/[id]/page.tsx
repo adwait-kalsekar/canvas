@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { currentUser } from '@clerk/nextjs';
 
-// import Comment from '@/components/forms/Comment';
+import Comment from '@/components/forms/Comment';
 import PostCard from '@/components/cards/PostCard';
 
 import { fetchUser } from '@/lib/actions/user.actions';
@@ -18,33 +18,33 @@ async function page({ params }: { params: { id: string } }) {
   const userInfo = await fetchUser(user.id);
   if (!userInfo?.onboarded) redirect('/onboarding');
 
-  const thread = await fetchPostById(params.id);
+  const post = await fetchPostById(params.id);
 
   return (
     <section className="relative">
       <div>
         <PostCard
-          id={thread._id}
+          id={post._id}
           currentUserId={user.id}
-          parentId={thread.parentId}
-          content={thread.text}
-          author={thread.author}
-          community={thread.community}
-          createdAt={thread.createdAt}
-          comments={thread.children}
+          parentId={post.parentId}
+          content={post.text}
+          author={post.author}
+          community={post.community}
+          createdAt={post.createdAt}
+          comments={post.children}
         />
       </div>
 
-      {/* <div className="mt-7">
+      <div className="mt-7">
         <Comment
-          threadId={params.id}
-          currentUserImg={user.imageUrl}
+          postId={params.id}
+          currentUserImg={userInfo.image}
           currentUserId={JSON.stringify(userInfo._id)}
         />
-      </div> */}
+      </div>
 
       <div className="mt-10">
-        {thread.children.map((childItem: any) => (
+        {post.children.map((childItem: any) => (
           <PostCard
             key={childItem._id}
             id={childItem._id}
