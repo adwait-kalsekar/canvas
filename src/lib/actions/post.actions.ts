@@ -26,17 +26,17 @@ export async function fetchPosts(pageNumber = 1, pageSize = 20) {
       model: Community,
     })
     .populate({
-      path: 'children', // Populate the children field
+      path: 'children',
       populate: {
-        path: 'author', // Populate the author field within children
+        path: 'author',
         model: User,
-        select: '_id name parentId image', // Select only _id and username fields of the author
+        select: '_id name parentId image',
       },
     });
 
   const totalPostsCount = await Post.countDocuments({
     parentId: { $in: [null, undefined] },
-  }); // Get the total count of posts
+  });
 
   const posts = await postsQuery.exec();
 
