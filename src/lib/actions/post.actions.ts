@@ -109,30 +109,27 @@ export async function deletePost(id: string, path: string): Promise<void> {
 
     const descendantPostIds = [id, ...descendantPosts.map((post) => post._id)];
 
-    // Extract the authorIds and communityIds to update User and Community models respectively
     const uniqueAuthorIds = new Set(
       [
-        ...descendantPosts.map((post) => post.author?._id?.toString()), // Use optional chaining to handle possible undefined values
+        ...descendantPosts.map((post) => post.author?._id?.toString()),
         mainPost.author?._id?.toString(),
       ].filter((id) => id !== undefined)
     );
 
     const uniqueCommunityIds = new Set(
       [
-        ...descendantPosts.map((post) => post.community?._id?.toString()), // Use optional chaining to handle possible undefined values
+        ...descendantPosts.map((post) => post.community?._id?.toString()),
         mainPost.community?._id?.toString(),
       ].filter((id) => id !== undefined)
     );
 
     await Post.deleteMany({ _id: { $in: descendantPostIds } });
 
-    // Update User model
     await User.updateMany(
       { _id: { $in: Array.from(uniqueAuthorIds) } },
       { $pull: { posts: { $in: descendantPostIds } } }
     );
 
-    // Update Community model
     await Community.updateMany(
       { _id: { $in: Array.from(uniqueCommunityIds) } },
       { $pull: { posts: { $in: descendantPostIds } } }
@@ -153,27 +150,27 @@ export async function fetchPostById(postId: string) {
         path: 'author',
         model: User,
         select: '_id id name image',
-      }) // Populate the author field with _id and username
+      })
       .populate({
         path: 'community',
         model: Community,
         select: '_id id name image',
-      }) // Populate the community field with _id and name
+      })
       .populate({
-        path: 'children', // Populate the children field
+        path: 'children',
         populate: [
           {
-            path: 'author', // Populate the author field within children
+            path: 'author',
             model: User,
-            select: '_id id name parentId image', // Select only _id and username fields of the author
+            select: '_id id name parentId image',
           },
           {
-            path: 'children', // Populate the children field within children
-            model: Post, // The model of the nested children (assuming it's the same "Post" model)
+            path: 'children',
+            model: Post,
             populate: {
-              path: 'author', // Populate the author field within nested children
+              path: 'author',
               model: User,
-              select: '_id id name parentId image', // Select only _id and username fields of the author
+              select: '_id id name parentId image',
             },
           },
         ],
@@ -196,27 +193,22 @@ export async function addCommentToPost(
   connectToDB();
 
   try {
-    // Find the original post by its ID
     const originalPost = await Post.findById(postId);
 
     if (!originalPost) {
       throw new Error('Post not found');
     }
 
-    // Create the new comment post
     const commentPost = new Post({
       text: commentText,
       author: userId,
-      parentId: postId, // Set the parentId to the original post's ID
+      parentId: postId,
     });
 
-    // Save the comment post to the database
     const savedCommentPost = await commentPost.save();
 
-    // Add the comment post's ID to the original post's children array
     originalPost.children.push(savedCommentPost._id);
 
-    // Save the updated original post to the database
     await originalPost.save();
 
     revalidatePath(path);

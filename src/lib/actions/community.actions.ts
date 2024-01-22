@@ -229,7 +229,6 @@ export async function updateCommunityInfo(
   try {
     connectToDB();
 
-    // Find the community by its _id and update the information
     const updatedCommunity = await Community.findOneAndUpdate(
       { id: communityId },
       { name, username, image }
@@ -241,7 +240,6 @@ export async function updateCommunityInfo(
 
     return updatedCommunity;
   } catch (error) {
-    // Handle any errors
     console.error('Error updating community information:', error);
     throw error;
   }
